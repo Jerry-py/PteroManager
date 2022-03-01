@@ -1,25 +1,34 @@
-import discord
-from discord.commands import Option
 from dotenv import load_dotenv
-from utils.logging import log
+from utilities.bot import PteroManager
+from utilities import logging
 import os
+
+# Clear the console at the start so it's nice and clean for errors and the start message.
+if os.name == "nt":
+    os.system("cls")
+else:
+    os.system("clear")
 
 # Load the env file
 load_dotenv()
 
-# Initiate the PyCord Bot.
-bot = discord.Bot()
+# Initiate the Bot from the utils file.
+bot = PteroManager()
 
+# Attempt to load the cogs.
+try:
+    bot.load_cogs()
+    logging.log(4, "Loaded all cogs successfully!!")
+except Exception as e:
+    print(e)
+    logging.log(1, "Error in loading cogs. Bot will not start.")
+    exit()
 
-@bot.event
-async def on_ready():
-    # Log to the user that we're signed in.
-    log(4, f"We have logged in as {bot.user}")
-
-
-# Load the cogs
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        bot.load_extension(f"cogs.{filename[:-3]}")
-
-bot.run(os.environ["BOT_TOKEN"])
+# Attempt to run the bot.
+try:
+    bot.run(os.environ["BOT_TOKEN"])
+except:
+    logging.log(
+        1,
+        "Bot failed to start. Check the token and your network connection then try again!",
+    )
